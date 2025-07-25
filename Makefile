@@ -8,7 +8,7 @@ OBJCOPY = objcopy
 QEMU = qemu-system-i386
 
 # Compiler flags
-CFLAGS = -m32 -fno-pie -fno-stack-protector -nostdlib -nostdinc -fno-builtin -fno-pic -mno-red-zone -Wall -Wextra -std=c99
+CFLAGS = -m32 -fno-pie -fno-stack-protector -nostdlib -nostdinc -fno-builtin -fno-pic -mno-red-zone -Wall -Wextra -std=c99 -Iinclude
 ASFLAGS = -f elf32
 LDFLAGS = -m elf_i386 -T kernel/linker.ld
 
@@ -19,12 +19,12 @@ BUILD_DIR = build
 
 # Source files
 BOOT_SRC = $(BOOT_DIR)/boot.s
-KERNEL_SRC = $(KERNEL_DIR)/kernel.c
-KERNEL_HEADERS = $(KERNEL_DIR)/kernel.h
+KERNEL_SRC = $(KERNEL_DIR)/kernel.c $(KERNEL_DIR)/terminal.c
+KERNEL_HEADERS = $(KERNEL_DIR)/kernel.h include/terminal.h
 
 # Object files
 BOOT_OBJ = $(BUILD_DIR)/boot.bin
-KERNEL_OBJ = $(BUILD_DIR)/kernel.o
+KERNEL_OBJ = $(BUILD_DIR)/kernel.o $(BUILD_DIR)/terminal.o
 KERNEL_ELF = $(BUILD_DIR)/kernel.elf
 KERNEL_BIN = $(BUILD_DIR)/kernel.bin
 
@@ -43,12 +43,16 @@ $(BOOT_OBJ): $(BOOT_SRC) | $(BUILD_DIR)
 	$(AS) -f bin -o $@ $<
 
 # Compile kernel
-$(KERNEL_OBJ): $(KERNEL_SRC) $(KERNEL_HEADERS) | $(BUILD_DIR)
+$(BUILD_DIR)/kernel.o: $(KERNEL_DIR)/kernel.c $(KERNEL_HEADERS) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+# Compile terminal
+$(BUILD_DIR)/terminal.o: $(KERNEL_DIR)/terminal.c $(KERNEL_HEADERS) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 # Link kernel
-$(KERNEL_ELF): $(KERNEL_OBJ) | $(BUILD_DIR)
-	$(LD) $(LDFLAGS) -o $@ $<
+$(KERNEL_ELF): $(BUILD_DIR)/kernel.o $(BUILD_DIR)/terminal.o | $(BUILD_DIR)
+	$(LD) $(LDFLAGS) -o $@ $^
 
 # Extract kernel binary
 $(KERNEL_BIN): $(KERNEL_ELF) | $(BUILD_DIR)
