@@ -350,4 +350,41 @@ size_t strlen(const char* str) {
         len++;
     }
     return len;
+}
+
+// String copy function
+char* strcpy(char* dest, const char* src) {
+    char* ptr = dest;
+    while (*src) {
+        *ptr = *src;
+        ptr++;
+        src++;
+    }
+    *ptr = '\0';
+    return dest;
+}
+
+// String compare function
+int strcmp(const char* str1, const char* str2) {
+    while (*str1 && *str2) {
+        if (*str1 != *str2) {
+            return (*str1 < *str2) ? -1 : 1;
+        }
+        str1++;
+        str2++;
+    }
+    return (*str1 == *str2) ? 0 : (*str1 < *str2) ? -1 : 1;
+}
+
+// String compare with length function
+int strncmp(const char* str1, const char* str2, size_t n) {
+    for (size_t i = 0; i < n; i++) {
+        if (str1[i] != str2[i]) {
+            return (str1[i] < str2[i]) ? -1 : 1;
+        }
+        if (str1[i] == '\0') {
+            return 0;
+        }
+    }
+    return 0;
 } 

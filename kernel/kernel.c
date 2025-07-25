@@ -1,10 +1,18 @@
 #include "kernel.h"
 #include "terminal.h"
+#include "interrupts.h"
+#include "keyboard.h"
 
 // Main kernel entry point
 void kernel_main(void) {
     // Initialize terminal
     terminal_initialize();
+    
+    // Initialize interrupts
+    interrupts_init();
+    
+    // Initialize keyboard
+    keyboard_init();
     
     // Welcome message with enhanced colors
     terminal_setcolor(VGA_COLOR(VGA_LIGHT_GREEN, VGA_BLACK));

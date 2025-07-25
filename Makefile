@@ -19,12 +19,12 @@ BUILD_DIR = build
 
 # Source files
 BOOT_SRC = $(BOOT_DIR)/boot.s
-KERNEL_SRC = $(KERNEL_DIR)/kernel.c $(KERNEL_DIR)/terminal.c
-KERNEL_HEADERS = $(KERNEL_DIR)/kernel.h include/terminal.h
+KERNEL_SRC = $(KERNEL_DIR)/kernel.c $(KERNEL_DIR)/terminal.c $(KERNEL_DIR)/interrupts.c $(KERNEL_DIR)/keyboard.c
+KERNEL_HEADERS = $(KERNEL_DIR)/kernel.h include/terminal.h include/interrupts.h include/keyboard.h
 
 # Object files
 BOOT_OBJ = $(BUILD_DIR)/boot.bin
-KERNEL_OBJ = $(BUILD_DIR)/kernel.o $(BUILD_DIR)/terminal.o
+KERNEL_OBJ = $(BUILD_DIR)/kernel.o $(BUILD_DIR)/terminal.o $(BUILD_DIR)/interrupts.o $(BUILD_DIR)/keyboard.o
 KERNEL_ELF = $(BUILD_DIR)/kernel.elf
 KERNEL_BIN = $(BUILD_DIR)/kernel.bin
 
@@ -50,8 +50,16 @@ $(BUILD_DIR)/kernel.o: $(KERNEL_DIR)/kernel.c $(KERNEL_HEADERS) | $(BUILD_DIR)
 $(BUILD_DIR)/terminal.o: $(KERNEL_DIR)/terminal.c $(KERNEL_HEADERS) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
+# Compile interrupts
+$(BUILD_DIR)/interrupts.o: $(KERNEL_DIR)/interrupts.c $(KERNEL_HEADERS) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+# Compile keyboard
+$(BUILD_DIR)/keyboard.o: $(KERNEL_DIR)/keyboard.c $(KERNEL_HEADERS) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
 # Link kernel
-$(KERNEL_ELF): $(BUILD_DIR)/kernel.o $(BUILD_DIR)/terminal.o | $(BUILD_DIR)
+$(KERNEL_ELF): $(BUILD_DIR)/kernel.o $(BUILD_DIR)/terminal.o $(BUILD_DIR)/interrupts.o $(BUILD_DIR)/keyboard.o | $(BUILD_DIR)
 	$(LD) $(LDFLAGS) -o $@ $^
 
 # Extract kernel binary
